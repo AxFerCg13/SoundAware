@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">SoundAware</string>
+    <string name="app_name" translatable="false">SoundAware</string>
+    <string name="sound_label" translatable="false">SOUND</string>
+    <string name="aware_label" translatable="false">AWARE</string>
+    <string name="ultima_alerta_label" translatable="false">Última alerta</string>
+    <string name="historial_label" translatable="false">Historial</string>
 </resources>
