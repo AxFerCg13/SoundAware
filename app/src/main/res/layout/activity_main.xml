@@ -7,13 +7,64 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="43dp"
+        android:layout_height="47dp"
+        android:layout_marginStart="7dp"
+        android:layout_marginTop="36dp"
+        android:layout_marginEnd="7dp"
+        app:layout_constraintEnd_toStartOf="@+id/textView"
+        app:layout_constraintStart_toEndOf="@+id/textView2"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/soundaware" />
+
     <TextView
+        android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:text="SOUND"
+        android:textColor="@color/black"
+        android:textSize="35sp"
+        android:textStyle="normal"
+        tools:layout_editor_absoluteX="61dp"
+        tools:layout_editor_absoluteY="36dp" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="AWARE"
+        android:textColor="@color/black"
+        android:textSize="35sp"
+        tools:layout_editor_absoluteX="234dp"
+        tools:layout_editor_absoluteY="36dp" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Última alerta"
+        android:textColor="@color/black"
+        android:textSize="24sp"
+        tools:layout_editor_absoluteX="35dp"
+        tools:layout_editor_absoluteY="126dp" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Historial"
+        android:textSize="24dp"
+        tools:layout_editor_absoluteX="35dp"
+        tools:layout_editor_absoluteY="327dp" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="409dp"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"
+        tools:layout_editor_absoluteX="1dp"
+        tools:layout_editor_absoluteY="311dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
