@@ -1,40 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    app:cardCornerRadius="9dp"
+    app:cardElevation="4dp"
+    android:layout_margin="10dp">
 
     <LinearLayout
         android:layout_width="382dp"
-        android:layout_height="188dp"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_gravity="center"
-        android:background="#FFFFFF"
-        android:padding="15dp"
         android:paddingTop="35dp"
         android:paddingBottom="35dp"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp"
         android:gravity="center_vertical"
-        android:justificationMode="inter_word"
-        android:backgroundTint="#FFFFFF"
-        android:elevation="4dp"
-        android:outlineProvider="background">
+        android:background="#FFFFFF">
 
         <ImageView
             android:id="@+id/card_icon"
             android:layout_width="62dp"
             android:layout_height="62dp"
-            android:layout_gravity="center"
+            android:layout_gravity="center_vertical"
             android:contentDescription="@string/alert_image_description_label"
             tools:srcCompat="@tools:sample/avatars" />
 
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
             android:paddingLeft="15dp"
-            android:gravity="center_vertical">
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp">
 
             <TextView
                 android:id="@+id/alert_date"

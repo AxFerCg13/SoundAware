@@ -28,14 +28,14 @@ public class AlertAdapter extends RecyclerView .Adapter<AlertAdapter.ViewHolder>
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.alert_card, parent);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.alert_card, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.alertDate.setText(alertList.get(position).getDate());
-        holder.alertDate.setText(alertList.get(position).getDescription());
+        holder.alertDescription.setText(alertList.get(position).getDescription());
     }
 
     @Override
