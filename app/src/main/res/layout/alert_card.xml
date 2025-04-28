@@ -27,7 +27,7 @@
             android:layout_height="62dp"
             android:layout_gravity="center_vertical"
             android:contentDescription="@string/alert_image_description_label"
-            tools:srcCompat="@tools:sample/avatars" />
+            tools:srcCompat="@drawable/history_icon" />
 
         <LinearLayout
             android:layout_width="0dp"

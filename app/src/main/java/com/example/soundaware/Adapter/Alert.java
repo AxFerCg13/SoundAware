@@ -3,11 +3,15 @@ package com.example.soundaware.Adapter;
 public class Alert {
     // Attributes at desing
     private int id;
+
+    private String  iconPath;
     private String date;
     private String description;
 
-    public Alert(int id, String date, String description) {
+
+    public Alert(int id, String iconPath, String date, String description) {
         this.id = id;
+        this.iconPath = iconPath;
         this.date = date;
         this.description = description;
     }
@@ -40,10 +44,19 @@ public class Alert {
         this.description = description;
     }
 
+    public String getIconPath() {
+        return iconPath;
+    }
+
+    public void setIconPath(String iconPath) {
+        this.iconPath = iconPath;
+    }
+
     @Override
     public String toString() {
         return "Alert{" +
                 "id=" + id +
+                ", iconPath='" + iconPath + '\'' +
                 ", date='" + date + '\'' +
                 ", description='" + description + '\'' +
                 '}';

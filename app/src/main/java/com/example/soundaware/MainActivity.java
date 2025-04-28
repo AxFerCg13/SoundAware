@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         List<Alert> alertList = new ArrayList<>();
 
         for(int i = 0; i < 5; i++){
-            alertList.add(new Alert(i, "22 de abril 2025, 12:44pm", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ipsum dolor sit amet, consectetur adipiscing elit. "));
+            alertList.add(new Alert(i, "history_icon","22 de abril 2025, 12:44pm", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ipsum dolor sit amet, consectetur adipiscing elit. "));
         }
         alertAdapter = new AlertAdapter(alertList, this);
         alertsRecycler.setAdapter((alertAdapter));
