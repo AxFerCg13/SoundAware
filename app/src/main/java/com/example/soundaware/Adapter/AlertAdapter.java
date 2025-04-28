@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.soundaware.R;
 
 import java.util.List;
@@ -39,7 +40,7 @@ public class AlertAdapter extends RecyclerView .Adapter<AlertAdapter.ViewHolder>
 
     @Override
     public int getItemCount() {
-        return 0;
+        return alertList.size();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
