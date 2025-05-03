@@ -14,6 +14,14 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.soundaware.Adapter.Alert;
+import com.example.soundaware.Adapter.AlertAdapter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -26,6 +34,9 @@ public class MainActivity extends AppCompatActivity {
     public static final int REQUEST_AUDIO_PERMISSION_CODE = 200;
 
 
+    RecyclerView alertsRecycler;
+    AlertAdapter alertAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
         Toast.makeText(this, "Corriendo en segundo plano", Toast.LENGTH_LONG).show();
+
 
         if (!checkPermissions()) requestPermissions();
 
@@ -61,7 +73,34 @@ public class MainActivity extends AppCompatActivity {
             //}
         //}, 0, 11, TimeUnit.SECONDS);
 
+        initializeLastCard();
+        initializeHistoryCards();
+    }
 
+    private void initializeHistoryCards(){
+        alertsRecycler = findViewById(R.id.recycler_history);
+        alertsRecycler.setLayoutManager(new LinearLayoutManager(this));
+
+        List<Alert> alertList = new ArrayList<>();
+
+        for(int i = 0; i < 5; i++){
+            alertList.add(new Alert(i, "history_icon","22 de abril 2025, 12:44pm", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ipsum dolor sit amet, consectetur adipiscing elit. "));
+        }
+        alertAdapter = new AlertAdapter(alertList, this);
+        alertsRecycler.setAdapter((alertAdapter));
+    }
+
+    private void initializeLastCard(){
+        alertsRecycler = findViewById(R.id.recycler_last_alert);
+        alertsRecycler.setLayoutManager(new LinearLayoutManager(this));
+
+        List<Alert> alertList = new ArrayList<>();
+
+        for(int i = 0; i < 1; i++){
+            alertList.add(new Alert(i, "last_icon","27 de abril 2025, 12:44pm", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ipsum dolor sit amet, consectetur adipiscing elit. "));
+        }
+        alertAdapter = new AlertAdapter(alertList, this);
+        alertsRecycler.setAdapter((alertAdapter));
     }
 
     private String getNewFilePath() {
