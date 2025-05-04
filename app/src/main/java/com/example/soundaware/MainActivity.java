@@ -1,6 +1,7 @@
 package com.example.soundaware;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -32,11 +33,13 @@ import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
     public static final int REQUEST_AUDIO_PERMISSION_CODE = 200;
+    public static final int INTERVALOS_DE_AUDIO = 15;
 
 
     RecyclerView alertsRecycler;
     AlertAdapter alertAdapter;
 
+    @SuppressLint("SuspiciousIndentation")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,31 +53,43 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, "Corriendo en segundo plano", Toast.LENGTH_LONG).show();
 
 
-        if (!checkPermissions()) requestPermissions();
-
-        //ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(1);
-        //exec.scheduleWithFixedDelay(new Runnable() {
-            //public void run() {
-                // codigo a ejecutar repetidas veces
-                if(checkPermissions()) {
-                    File f = new File(getNewFilePath());
-                    AudioRecorder mMediaRecorder = new AudioRecorder(f);
-                    boolean recording = mMediaRecorder.startRecorder();
-
-                    try{
-                        TimeUnit.SECONDS.sleep(10); //Segundos a grabar por cada corte
-                        mMediaRecorder.stopRecording();
-                    }catch(Exception e){
-                       Log.e("MainActivity", "Fallo la grabacion: " + e.getLocalizedMessage());
-                   }
-
-
-                }
-            //}
-        //}, 0, 11, TimeUnit.SECONDS);
-
         initializeLastCard();
         initializeHistoryCards();
+
+        if (!checkPermissions()) requestPermissions();
+
+        //Descomentar para implemetar bucle
+        //ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(1);
+        //exec.scheduleWithFixedDelay(new Runnable() {
+        // public void run() {
+        // codigo a ejecutar repetidas veces
+        if(checkPermissions()) {
+            File f = new File(getNewFilePath());
+            AudioRecorder mMediaRecorder = new AudioRecorder(f);
+            mMediaRecorder.startRecorder();
+            double amp = mMediaRecorder.getMaxAmplitude();
+
+
+            try{
+                TimeUnit.SECONDS.sleep(INTERVALOS_DE_AUDIO); //Segundos a grabar por cada corte
+                amp = mMediaRecorder.getMaxAmplitude();
+                mMediaRecorder.stopRecording();
+
+                if(amp > 50.0) {
+                    Toast.makeText(this, "Se detecto un sonido fuerte: " + amp, Toast.LENGTH_LONG).show();
+                } else {
+                    mMediaRecorder.delete();
+                    Toast.makeText(this, "Se elimino el archivo" , Toast.LENGTH_LONG).show();
+                }
+
+            }catch(Exception e){
+                Log.e("MainActivity", "Fallo la grabacion: " + e.getLocalizedMessage());
+            }
+
+        }
+        //  }
+
+        // }, 0, 11, TimeUnit.SECONDS);
     }
 
     private void initializeHistoryCards(){
@@ -115,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
     private void requestPermissions() {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_AUDIO_PERMISSION_CODE);
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

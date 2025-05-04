@@ -25,7 +25,7 @@ public class AudioRecorder {
         double amplitude = 0;
         if (mMediaRecorder != null) {
             try {
-                amplitude = mMediaRecorder.getMaxAmplitude();
+                amplitude = 20 * Math.log10((double)Math.abs(mMediaRecorder.getMaxAmplitude()));
             } catch (IllegalArgumentException e) {
                 Log.e("MainActivity", "No se pudo obtener amplitud: " + e.getLocalizedMessage());
             }
@@ -33,22 +33,23 @@ public class AudioRecorder {
         return amplitude;
     }
 
-    public boolean startRecorder(){
+    public void startRecorder(){
         if (RecAudioFile == null) {
-            return false;
+            return;
         }
         try {
             mMediaRecorder = new MediaRecorder();
 
-            mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION);
             mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
             mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
             mMediaRecorder.setOutputFile(RecAudioFile.getAbsolutePath());
 
+
+
             mMediaRecorder.prepare();
             mMediaRecorder.start();
             isRecording = true;
-            return isRecording;
         } catch(IOException e) {
             mMediaRecorder.reset();
             mMediaRecorder.release();
@@ -60,7 +61,6 @@ public class AudioRecorder {
             Log.e("MainActivity", "Fallo la grabacion: " + e.getLocalizedMessage());
             isRecording = false ;
         }
-        return isRecording;
     }
 
     public void stopRecording() {
