@@ -1,147 +1,193 @@
 package com.example.soundaware;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.soundaware.Adapter.Alert;
 import com.example.soundaware.Adapter.AlertAdapter;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.example.soundaware.api.connection.ApiClient;
+import com.example.soundaware.api.models.audio.AudioResponse;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class MainActivity extends AppCompatActivity {
-    public static final int REQUEST_AUDIO_PERMISSION_CODE = 200;
-    public static final int INTERVALOS_DE_AUDIO = 15;
 
+    private static final int REQUEST_AUDIO_PERMISSION_CODE = 200;
+    private static final int RECORDING_INTERVAL_SECONDS = 10;
+    private static final double LOUD_SOUND_THRESHOLD = 1.0;
 
-    RecyclerView alertsRecycler;
-    AlertAdapter alertAdapter;
+    private RecyclerView lastAlertRecycler;
+    private RecyclerView historyRecycler;
+    private AlertAdapter lastAlertAdapter;
+    private AlertAdapter historyAlertAdapter;
+    private final List<Alert> lastAlertList = new ArrayList<>();
+    private final List<Alert> historyAlertList = new ArrayList<>();
 
-    @SuppressLint("SuspiciousIndentation")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-        Toast.makeText(this, "Corriendo en segundo plano", Toast.LENGTH_LONG).show();
 
+        initializeUIComponents();
+        handleAudioRecording();
+    }
 
-        initializeLastCard();
-        initializeHistoryCards();
+    private void initializeUIComponents() {
+        lastAlertRecycler = findViewById(R.id.recycler_last_alert);
+        historyRecycler = findViewById(R.id.recycler_history);
 
-        if (!checkPermissions()) requestPermissions();
+        lastAlertRecycler.setLayoutManager(new LinearLayoutManager(this));
+        historyRecycler.setLayoutManager(new LinearLayoutManager(this));
 
-        //Descomentar para implemetar bucle
-        //ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(1);
-        //exec.scheduleWithFixedDelay(new Runnable() {
-        // public void run() {
-        // codigo a ejecutar repetidas veces
-        if(checkPermissions()) {
-            File f = new File(getNewFilePath());
-            AudioRecorder mMediaRecorder = new AudioRecorder(f);
-            mMediaRecorder.startRecorder();
-            double amp = mMediaRecorder.getMaxAmplitude();
+        lastAlertAdapter = new AlertAdapter(lastAlertList, this);
+        historyAlertAdapter = new AlertAdapter(historyAlertList, this);
 
+        lastAlertRecycler.setAdapter(lastAlertAdapter);
+        historyRecycler.setAdapter(historyAlertAdapter);
+    }
 
-            try{
-                TimeUnit.SECONDS.sleep(INTERVALOS_DE_AUDIO); //Segundos a grabar por cada corte
-                amp = mMediaRecorder.getMaxAmplitude();
-                mMediaRecorder.stopRecording();
+    private void handleAudioRecording() {
+        if (checkAudioPermission()) {
+            startRecordingLoop();
+        } else {
+            requestAudioPermission();
+        }
+    }
 
-                if(amp > 50.0) {
-                    Toast.makeText(this, "Se detecto un sonido fuerte: " + amp, Toast.LENGTH_LONG).show();
-                } else {
-                    mMediaRecorder.delete();
-                    Toast.makeText(this, "Se elimino el archivo" , Toast.LENGTH_LONG).show();
+    private void startRecordingLoop() {
+        new Thread(() -> {
+            while (true) {
+                try {
+                    File audioFile = createNewAudioFile();
+                    AudioRecorder recorder = new AudioRecorder(audioFile);
+
+                    recorder.startRecorder();
+                    TimeUnit.SECONDS.sleep(RECORDING_INTERVAL_SECONDS);
+                    double currentAmplitude = recorder.getMaxAmplitude();
+                    recorder.stopRecording();
+
+                    if (currentAmplitude > LOUD_SOUND_THRESHOLD) {
+                        handleLoudSoundDetection(audioFile, currentAmplitude);
+                    } else {
+                        if (!audioFile.delete()) {
+                            Log.w("AudioCleanup", "Falla al borrar el audio");
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.e("RecordingLoop", "Error de grabación", e);
                 }
+            }
+        }).start();
+    }
 
-            }catch(Exception e){
-                Log.e("MainActivity", "Fallo la grabacion: " + e.getLocalizedMessage());
+    private void handleLoudSoundDetection(File audioFile, double amplitude) {
+        runOnUiThread(() -> {
+            Toast.makeText(this,
+                    "Sonido fuerte detectado: " + amplitude,
+                    Toast.LENGTH_LONG).show();
+            sendAudioToApi(audioFile);
+        });
+    }
+
+    private void sendAudioToApi(File audioFile) {
+        RequestBody requestBody = RequestBody.create(
+                audioFile,
+                MediaType.parse("audio/*")
+        );
+
+        MultipartBody.Part audioPart = MultipartBody.Part.createFormData(
+                "file",
+                audioFile.getName(),
+                requestBody
+        );
+
+        ApiClient.uploadAudioFile(audioPart).enqueue(new Callback<AudioResponse>() {
+            @Override
+            public void onResponse(Call<AudioResponse> call, Response<AudioResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    processApiResponse(response.body());
+                }
             }
 
+            @Override
+            public void onFailure(Call<AudioResponse> call, Throwable t) {
+                Log.e("APICommunication", "Upload failed", t);
+            }
+        });
+    }
+
+    private void processApiResponse(AudioResponse response) {
+        // Update last alert
+        lastAlertList.clear();
+        lastAlertList.add(createAlertFromResponse(response, 0, "last_icon"));
+        lastAlertAdapter.notifyDataSetChanged();
+
+        // Update history (keep only 5 items)
+        if (historyAlertList.size() >= 5) {
+            historyAlertList.remove(historyAlertList.size() - 1);
         }
-        //  }
-
-        // }, 0, 11, TimeUnit.SECONDS);
+        historyAlertList.add(0,
+                createAlertFromResponse(response, historyAlertList.size(), "history_icon"));
+        historyAlertAdapter.notifyDataSetChanged();
     }
 
-    private void initializeHistoryCards(){
-        alertsRecycler = findViewById(R.id.recycler_history);
-        alertsRecycler.setLayoutManager(new LinearLayoutManager(this));
-
-        List<Alert> alertList = new ArrayList<>();
-
-        for(int i = 0; i < 5; i++){
-            alertList.add(new Alert(i, "history_icon","22 de abril 2025, 12:44pm", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ipsum dolor sit amet, consectetur adipiscing elit. "));
-        }
-        alertAdapter = new AlertAdapter(alertList, this);
-        alertsRecycler.setAdapter((alertAdapter));
+    private Alert createAlertFromResponse(AudioResponse response, int id, String iconType) {
+        return new Alert(
+                id,
+                iconType,
+                response.getDate(),
+                response.getClassMessage()
+        );
     }
 
-    private void initializeLastCard(){
-        alertsRecycler = findViewById(R.id.recycler_last_alert);
-        alertsRecycler.setLayoutManager(new LinearLayoutManager(this));
-
-        List<Alert> alertList = new ArrayList<>();
-
-        for(int i = 0; i < 1; i++){
-            alertList.add(new Alert(i, "last_icon","27 de abril 2025, 12:44pm", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ipsum dolor sit amet, consectetur adipiscing elit. "));
-        }
-        alertAdapter = new AlertAdapter(alertList, this);
-        alertsRecycler.setAdapter((alertAdapter));
+    private File createNewAudioFile() {
+        return new File(getExternalFilesDir(null),
+                "SoundAware_" + new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
+                        .format(new Date()) + ".wav");
     }
 
-    private String getNewFilePath() {
-        File dir = getExternalFilesDir(null);
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss", Locale.getDefault());
-        String timeStamp = formatter.format(new Date());
-        return new File(dir, "SoundAware_" + timeStamp + ".wav").getAbsolutePath();
-    }
-    private boolean checkPermissions() {
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
-    }
-    private void requestPermissions() {
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_AUDIO_PERMISSION_CODE);
+    private boolean checkAudioPermission() {
+        return ContextCompat.checkSelfPermission(this,
+                Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
     }
 
+    private void requestAudioPermission() {
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.RECORD_AUDIO},
+                REQUEST_AUDIO_PERMISSION_CODE);
+    }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_AUDIO_PERMISSION_CODE) {
-            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                Toast.makeText(this, "Permiso concedido", Toast.LENGTH_LONG).show();
-            }
-        } else {
-            Toast.makeText(this, "Permiso denegado", Toast.LENGTH_LONG).show();
+        if (requestCode == REQUEST_AUDIO_PERMISSION_CODE &&
+                grantResults.length > 0 &&
+                grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            startRecordingLoop();
         }
     }
-
 }
