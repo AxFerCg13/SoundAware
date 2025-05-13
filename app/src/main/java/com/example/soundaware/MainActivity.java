@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.MediaType;
@@ -40,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_AUDIO_PERMISSION_CODE = 200;
     private static final int RECORDING_INTERVAL_SECONDS = 10;
-    private static final double LOUD_SOUND_THRESHOLD = 1.0;
+    private static final double LOUD_SOUND_THRESHOLD = 50.0;
 
     private RecyclerView lastAlertRecycler;
     private RecyclerView historyRecycler;
@@ -82,29 +83,33 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startScheduledRecording() {
-        scheduler = Executors.newSingleThreadScheduledExecutor();
-        scheduler.scheduleAtFixedRate(() -> {
-            try {
-                File audioFile = createNewAudioFile();
-                AudioRecorder recorder = new AudioRecorder(audioFile);
+        ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(1);
 
-                Log.d("AudioRecorder", "Iniciando grabación...");
-                recorder.startRecorder();
-                Thread.sleep(RECORDING_INTERVAL_SECONDS * 1000L);
-                double currentAmplitude = recorder.getMaxAmplitude();
-                recorder.stopRecording();
+        exec.scheduleWithFixedDelay(new Runnable() {
+            public void run() {
+                try {
+                    File audioFile = createNewAudioFile();
+                    AudioRecorder recorder = new AudioRecorder(audioFile);
 
-                Log.d("AudioRecorder", "Amplitud: " + currentAmplitude);
+                    Log.d("AudioRecorder", "Iniciando grabación...");
+                    recorder.startRecorder();
+                    double currentAmplitude = recorder.getMaxAmplitude();
+                    Thread.sleep(RECORDING_INTERVAL_SECONDS * 1000L);
+                    currentAmplitude = recorder.getMaxAmplitude();
+                    recorder.stopRecording();
 
-                if (currentAmplitude > LOUD_SOUND_THRESHOLD) {
-                    handleLoudSoundDetection(audioFile, currentAmplitude);
-                } else {
-                    if (!audioFile.delete()) {
-                        Log.w("AudioCleanup", "Falla al borrar el archivo de audio.");
+                    Log.d("AudioRecorder", "Amplitud: " + currentAmplitude);
+
+                    if (currentAmplitude > LOUD_SOUND_THRESHOLD) {
+                        handleLoudSoundDetection(audioFile, currentAmplitude);
+                    } else {
+                        if (!audioFile.delete()) {
+                            Log.w("AudioCleanup", "Falla al borrar el archivo de audio.");
+                        }
                     }
+                } catch (Exception e) {
+                    Log.e("RecordingScheduler", "Error durante grabación", e);
                 }
-            } catch (Exception e) {
-                Log.e("RecordingScheduler", "Error durante grabación", e);
             }
         }, 0, RECORDING_INTERVAL_SECONDS, TimeUnit.SECONDS);
     }
