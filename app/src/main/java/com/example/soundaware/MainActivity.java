@@ -1,7 +1,12 @@
 package com.example.soundaware;
 
 import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -10,6 +15,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -52,12 +58,16 @@ public class MainActivity extends AppCompatActivity {
 
     private ScheduledExecutorService scheduler;
 
+    private NotificationHelper notifHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initializeUIComponents();
+        handleNotification();
         handleAudioRecording();
+
     }
 
     private void initializeUIComponents() {
@@ -74,6 +84,13 @@ public class MainActivity extends AppCompatActivity {
         historyRecycler.setAdapter(historyAlertAdapter);
     }
 
+    private void handleNotification() {
+        if(checkNotifPermission()) {
+            notifHelper = new NotificationHelper(this);
+        } else {
+            requestNotifPermission();
+        }
+    }
     private void handleAudioRecording() {
         if (checkAudioPermission()) {
             startScheduledRecording();
@@ -160,6 +177,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private Alert createAlertFromResponse(AudioResponse response, int id, String iconType) {
+        //TODO: adaptar el mensaje de la notificacion
+        notifHelper.showNotification(this, "SoundAware", "Alerta detectada");
         return new Alert(id, iconType, response.getDate(), response.getClassMessage());
     }
 
@@ -179,23 +198,21 @@ public class MainActivity extends AppCompatActivity {
                 == PackageManager.PERMISSION_GRANTED;
     }
 
+    private boolean checkNotifPermission() {
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
     private void requestAudioPermission() {
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.RECORD_AUDIO},
                 REQUEST_AUDIO_PERMISSION_CODE);
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_AUDIO_PERMISSION_CODE &&
-                grantResults.length > 0 &&
-                grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            startScheduledRecording();
-        } else {
-            Toast.makeText(this, "Permiso de audio denegado", Toast.LENGTH_SHORT).show();
-        }
+    private void requestNotifPermission() {
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                1);
     }
 
     @Override
