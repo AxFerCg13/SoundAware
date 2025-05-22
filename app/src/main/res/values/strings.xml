@@ -11,6 +11,6 @@
     <string name="alert_level_value">ALTA</string>
     <string name="alert_description">Descripción: </string>
     <string name="alert_description_value">Alarma general activada</string>
-    <string name="alert_type">Tipo: </string>
+    <string name="alert_type">Clasificación: </string>
     <string name="alert_type_value">Alarm</string>
 </resources>
