@@ -7,4 +7,10 @@
     <string name="alert_image_description_label">Alert icon</string>
     <string name="alert_date_label">22 de abril de 2025, 12:44pm</string>
     <string name="alert_description_label">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ipsum dolor sit amet, consectetur adipiscing elit.</string>
+    <string name="alert_level">Prioridad: </string>
+    <string name="alert_level_value">ALTA</string>
+    <string name="alert_description">Descripción: </string>
+    <string name="alert_description_value">Alarma general activada</string>
+    <string name="alert_type">Tipo: </string>
+    <string name="alert_type_value">Alarm</string>
 </resources>

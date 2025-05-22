@@ -35,8 +35,8 @@
             android:layout_weight="1"
             android:orientation="vertical"
             android:paddingLeft="15dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp">
+            android:paddingTop="2dp"
+            android:paddingBottom="8dp">
 
             <TextView
                 android:id="@+id/alert_date"
@@ -44,16 +44,50 @@
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
                 android:text="@string/alert_date_label"
-                android:textColor="#181A89" />
+                android:textColor="#181A89"
+                android:layout_marginBottom="3dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="3dp">
+
+                <TextView
+                    android:id="@+id/alert_level"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/alert_level"
+                    android:textColor="#537FE7"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/alert_level_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/alert_level_value"
+                    android:textColor="#010101"
+                    android:textSize="14sp"
+                    android:layout_marginLeft="12dp" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/alert_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/alert_description_label"
+                android:text="@string/alert_description"
+                android:textColor="#537FE7"
+                android:textSize="14sp"
+                android:layout_marginBottom="1dp"/>
+
+            <TextView
+                android:id="@+id/alert_description_value"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/alert_description_value"
                 android:textColor="@android:color/black"
-                android:textSize="20sp" />
+                android:textSize="20sp"
+                android:layout_marginTop="1dp"/>
         </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>
