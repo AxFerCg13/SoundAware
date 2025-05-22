@@ -85,12 +85,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void handleNotification() {
-        if(checkNotifPermission()) {
+        if (checkNotifPermission()) {
             notifHelper = new NotificationHelper(this);
         } else {
             requestNotifPermission();
         }
     }
+
     private void handleAudioRecording() {
         if (checkAudioPermission()) {
             startScheduledRecording();
@@ -178,8 +179,11 @@ public class MainActivity extends AppCompatActivity {
 
     private Alert createAlertFromResponse(AudioResponse response, int id, String iconType) {
         //TODO: adaptar el mensaje de la notificacion
-        notifHelper.showNotification(this, "SoundAware", "Alerta detectada");
-        return new Alert(id, iconType, response.getDate(), response.getClassMessage());
+        if (response.getIs_alarm()) {
+            notifHelper.showNotification(this, response.getClassMessage(), response.getDescription());
+            return new Alert(id, iconType, response.getDate(), response.getClassMessage(), response.getUrgency_level(), response.getDescription());
+        }
+        return null;
     }
 
     private File createNewAudioFile() {

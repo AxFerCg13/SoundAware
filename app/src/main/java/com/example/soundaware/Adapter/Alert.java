@@ -6,18 +6,20 @@ public class Alert {
 
     private String  iconPath;
     private String date;
+
+    private String classfication;
+
+    private String priority;
     private String description;
 
 
-    public Alert(int id, String iconPath, String date, String description) {
+    public Alert(int id, String iconPath, String date, String classfication, String priority, String description) {
         this.id = id;
         this.iconPath = iconPath;
         this.date = date;
+        this.classfication = classfication;
+        this.priority = priority;
         this.description = description;
-    }
-
-    public Alert(int id) {
-        this.id = id;
     }
 
     public int getId() {
@@ -28,12 +30,36 @@ public class Alert {
         this.id = id;
     }
 
+    public String getIconPath() {
+        return iconPath;
+    }
+
+    public void setIconPath(String iconPath) {
+        this.iconPath = iconPath;
+    }
+
     public String getDate() {
         return date;
     }
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public String getClassfication() {
+        return classfication;
+    }
+
+    public void setClassfication(String classfication) {
+        this.classfication = classfication;
+    }
+
+    public String getPriority() {
+        return priority;
+    }
+
+    public void setPriority(String priority) {
+        this.priority = priority;
     }
 
     public String getDescription() {
@@ -44,20 +70,14 @@ public class Alert {
         this.description = description;
     }
 
-    public String getIconPath() {
-        return iconPath;
-    }
-
-    public void setIconPath(String iconPath) {
-        this.iconPath = iconPath;
-    }
-
     @Override
     public String toString() {
         return "Alert{" +
                 "id=" + id +
                 ", iconPath='" + iconPath + '\'' +
                 ", date='" + date + '\'' +
+                ", classfication='" + classfication + '\'' +
+                ", priority='" + priority + '\'' +
                 ", description='" + description + '\'' +
                 '}';
     }

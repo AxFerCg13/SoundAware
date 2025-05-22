@@ -58,7 +58,11 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.ViewHolder> 
             }
         }
         holder.alertDate.setText(alert.getDate() != null ? alert.getDate() : "");
+        holder.alertClassification.setText(alert.getClassfication() != null ? alert.getDescription() : "");
+        holder.alertPriority.setText(alert.getPriority());
         holder.alertDescription.setText(alert.getDescription() != null ? alert.getDescription() : "");
+
+
     }
 
     @Override
@@ -76,11 +80,17 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.ViewHolder> 
         private TextView alertDate;
         private TextView alertDescription;
 
+        private TextView alertClassification;
+
+        private TextView alertPriority;
+
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             cardIcon = itemView.findViewById(R.id.card_icon);
             alertDate = itemView.findViewById(R.id.alert_date);
             alertDescription = itemView.findViewById(R.id.alert_description);
+            alertClassification = itemView.findViewById(R.id.alert_type_value);
+            alertPriority = itemView.findViewById(R.id.alert_level_value);
         }
     }
 }
