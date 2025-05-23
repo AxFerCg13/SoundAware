@@ -37,6 +37,11 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.ViewHolder> 
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Alert alert = alertList.get(position);
 
+        // Evita crasheos por objetos nulos
+        if (alert == null) {
+            return;
+        }
+
         // Cargar imagen
         if (alert.getIconPath() != null && !alert.getIconPath().isEmpty()) {
             try {
@@ -55,15 +60,16 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.ViewHolder> 
                             .into(holder.cardIcon);
                 }
             } catch (Exception e) {
+                e.printStackTrace(); // Importante para depurar fallos silenciosos
             }
         }
+
         holder.alertDate.setText(alert.getDate() != null ? alert.getDate() : "");
-        holder.alertClassification.setText(alert.getClassfication() != null ? alert.getDescription() : "");
+        holder.alertClassification.setText(alert.getClassfication() != null ? alert.getClassfication() : "");
         holder.alertPriority.setText(alert.getPriority());
         holder.alertDescription.setText(alert.getDescription() != null ? alert.getDescription() : "");
-
-
     }
+
 
     @Override
     public int getItemCount() {
@@ -88,7 +94,7 @@ public class AlertAdapter extends RecyclerView.Adapter<AlertAdapter.ViewHolder> 
             super(itemView);
             cardIcon = itemView.findViewById(R.id.card_icon);
             alertDate = itemView.findViewById(R.id.alert_date);
-            alertDescription = itemView.findViewById(R.id.alert_description);
+            alertDescription = itemView.findViewById(R.id.alert_description_value);
             alertClassification = itemView.findViewById(R.id.alert_type_value);
             alertPriority = itemView.findViewById(R.id.alert_level_value);
         }

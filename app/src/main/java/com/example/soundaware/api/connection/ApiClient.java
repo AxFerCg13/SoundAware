@@ -2,6 +2,8 @@ package com.example.soundaware.api.connection;
 
 import com.example.soundaware.api.models.audio.AudioResponse;
 
+import java.util.concurrent.TimeUnit;
+
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -30,6 +32,9 @@ public class ApiClient {
             logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
             OkHttpClient client = new OkHttpClient.Builder()
+                    .connectTimeout(30, TimeUnit.SECONDS)  // Tiempo para conectarse al servidor
+                    .readTimeout(60, TimeUnit.SECONDS)     // Tiempo para leer la respuesta
+                    .writeTimeout(60, TimeUnit.SECONDS)    // Tiempo para subir el archivo
                     .addInterceptor(logging)
                     .build();
 

@@ -1,7 +1,7 @@
 package com.example.soundaware.api.models.audio;
 
 public class AudioResponse {
-    private Boolean is_alarm;
+    private Boolean is_alarm = false;
     private String classMessage;
     private double confidence;
     private String date;

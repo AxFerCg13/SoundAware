@@ -166,20 +166,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void processApiResponse(AudioResponse response) {
-        lastAlertList.clear();
-        lastAlertList.add(createAlertFromResponse(response, 0, "last_icon"));
-        lastAlertAdapter.notifyDataSetChanged();
+        Alert lastAlert = createAlertFromResponse(response, 0, "last_icon");
 
-        if (historyAlertList.size() >= 5) {
-            historyAlertList.remove(historyAlertList.size() - 1);
+        if (lastAlert != null) {
+
+            lastAlertList.clear();
+            lastAlertList.add(lastAlert);
+            lastAlertAdapter.notifyDataSetChanged();
+
+            if (historyAlertList.size() >= 5) {
+                historyAlertList.remove(historyAlertList.size() - 1);
+            }
+
+            historyAlertList.add(0, createAlertFromResponse(response, historyAlertList.size(), "history_icon"));
+            historyAlertAdapter.notifyDataSetChanged();
+        } else {
+            Log.d("API_ALERT", "Ignorar alerta");
         }
-        historyAlertList.add(0, createAlertFromResponse(response, historyAlertList.size(), "history_icon"));
-        historyAlertAdapter.notifyDataSetChanged();
     }
+
 
     private Alert createAlertFromResponse(AudioResponse response, int id, String iconType) {
         //TODO: adaptar el mensaje de la notificacion
-        if (response.getIs_alarm()) {
+        if (response.getIs_alarm() == true) {
             notifHelper.showNotification(this, response.getClassMessage(), response.getDescription());
             return new Alert(id, iconType, response.getDate(), response.getClassMessage(), response.getUrgency_level(), response.getDescription());
         }
