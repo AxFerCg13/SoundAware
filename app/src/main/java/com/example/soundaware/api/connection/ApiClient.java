@@ -15,7 +15,7 @@ import retrofit2.http.POST;
 import retrofit2.http.Part;
 
 public class ApiClient {
-    private static final String BASE_URL = "http://34.173.183.203:8000/";
+    private static final String BASE_URL = "http://34.139.5.224:8000/";
     private static Retrofit retrofit = null;
 
     public interface ApiService {
