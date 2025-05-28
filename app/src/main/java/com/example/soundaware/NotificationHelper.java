@@ -37,10 +37,10 @@ public class NotificationHelper {
 
 
     public static void showNotification(Context context, String title, String message) {
-        int notificationId = (int) (System.currentTimeMillis() / 1000); // Timestamp in seconds
+        int notificationId = (int) (System.currentTimeMillis() / 1000);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.soundaware) // Replace with your icon
+                .setSmallIcon(R.drawable.soundaware)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)

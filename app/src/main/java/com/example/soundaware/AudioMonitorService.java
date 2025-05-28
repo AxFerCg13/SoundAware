@@ -23,8 +23,8 @@ public class AudioMonitorService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        notifHelper = new NotificationHelper(this);
-        audioManager = new AudioManager(this, notifHelper, this::onAlertReceived);
+        notifHelper = new NotificationHelper(getApplicationContext());
+        audioManager = new AudioManager(getApplicationContext(), notifHelper, this::onAlertReceived);
 
         startForegroundServiceNotification();
         audioManager.startScheduledRecording();

@@ -4,15 +4,21 @@ import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
@@ -24,8 +30,11 @@ import com.example.soundaware.Adapter.Alert;
 import com.example.soundaware.Adapter.AlertAdapter;
 import com.example.soundaware.api.connection.ApiClient;
 import com.example.soundaware.api.models.audio.AudioResponse;
+import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
 
 import java.io.File;
+import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -84,9 +93,10 @@ public class MainActivity extends AppCompatActivity {
         historyRecycler.setAdapter(historyAlertAdapter);
     }
 
+
     private void handleNotification() {
         if (checkNotifPermission()) {
-           Log.e("notif","ok");
+           Log.e("Notification permission:","Permiso de notificaciones concedido");
         } else {
             requestNotifPermission();
         }
@@ -100,71 +110,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             requestAudioPermission();
         }
-    }
-
-    private void startScheduledRecording() {
-        ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(1);
-
-        exec.scheduleWithFixedDelay(new Runnable() {
-            public void run() {
-                try {
-                    File audioFile = createNewAudioFile();
-                    AudioRecorder recorder = new AudioRecorder(audioFile);
-
-                    Log.d("AudioRecorder", "Iniciando grabación...");
-                    recorder.startRecorder();
-                    double currentAmplitude = recorder.getMaxAmplitude();
-                    Thread.sleep(RECORDING_INTERVAL_SECONDS * 1000L);
-                    currentAmplitude = recorder.getMaxAmplitude();
-                    recorder.stopRecording();
-
-                    Log.d("AudioRecorder", "Amplitud: " + currentAmplitude);
-
-                    if (currentAmplitude > LOUD_SOUND_THRESHOLD) {
-                        handleLoudSoundDetection(audioFile, currentAmplitude);
-                    } else {
-                        if (!audioFile.delete()) {
-                            Log.w("AudioCleanup", "Falla al borrar el archivo de audio.");
-                        }
-                    }
-                } catch (Exception e) {
-                    Log.e("RecordingScheduler", "Error durante grabación", e);
-                }
-            }
-        }, 0, RECORDING_INTERVAL_SECONDS, TimeUnit.SECONDS);
-    }
-
-    private void handleLoudSoundDetection(File audioFile, double amplitude) {
-        runOnUiThread(() -> {
-            Toast.makeText(this, "Sonido fuerte detectado: " + amplitude, Toast.LENGTH_LONG).show();
-            sendAudioToApi(audioFile);
-        });
-    }
-
-    private void sendAudioToApi(File audioFile) {
-        RequestBody requestBody = RequestBody.create(
-                audioFile, MediaType.parse("audio/*")
-        );
-
-        MultipartBody.Part audioPart = MultipartBody.Part.createFormData(
-                "file", audioFile.getName(), requestBody
-        );
-
-        ApiClient.uploadAudioFile(audioPart).enqueue(new Callback<AudioResponse>() {
-            @Override
-            public void onResponse(Call<AudioResponse> call, Response<AudioResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    processApiResponse(response.body());
-                } else {
-                    Log.e("API", "Respuesta no exitosa");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<AudioResponse> call, Throwable t) {
-                Log.e("APICommunication", "Falla al subir audio", t);
-            }
-        });
     }
 
     private void processApiResponse(AudioResponse response) {
@@ -195,17 +140,6 @@ public class MainActivity extends AppCompatActivity {
             return new Alert(id, iconType, response.getDate(), response.getClassMessage(), response.getUrgency_level(), response.getDescription());
         }
         return null;
-    }
-
-    private File createNewAudioFile() {
-        File dir = getExternalFilesDir(Environment.DIRECTORY_MUSIC);
-        if (dir == null) {
-            Log.e("FileError", "Directorio de música no disponible");
-            throw new RuntimeException("No se puede acceder al almacenamiento externo");
-        }
-
-        return new File(dir, "SoundAware_" +
-                new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date()) + ".wav");
     }
 
     private boolean checkAudioPermission() {
