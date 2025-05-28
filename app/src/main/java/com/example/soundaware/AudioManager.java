@@ -36,7 +36,7 @@ public class AudioManager {
     private final Consumer<Alert> onAlertReceived;
 
     public AudioManager(Context context, NotificationHelper notifHelper, Consumer<Alert> onAlertReceived) {
-        this.context = context;
+        this.context = context.getApplicationContext();;
         this.notifHelper = notifHelper;
         this.onAlertReceived = onAlertReceived;
     }
@@ -108,14 +108,7 @@ public class AudioManager {
 
             Alert alert = new Alert(id, iconType, response.getDate(), response.getClassMessage(), response.getUrgency_level(), response.getDescription());
 
-            Intent intent = new Intent("com.soundaware.ALERT_RECEIVED");
-            intent.putExtra("title", alert.getClassfication());
-            intent.putExtra("description", alert.getDescription());
-            intent.putExtra("date", alert.getDate());
-            intent.putExtra("urgency", alert.getPriority());
-            intent.putExtra("icon", alert.getIconPath());
-
-            context.sendBroadcast(intent);
+            //TODO: Almacenar en la BD
         }
     }
 
