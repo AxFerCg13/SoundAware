@@ -60,10 +60,10 @@ public class MainActivity extends AppCompatActivity {
 
     private RecyclerView lastAlertRecycler;
     private RecyclerView historyRecycler;
-    private AlertAdapter lastAlertAdapter;
-    private AlertAdapter historyAlertAdapter;
-    private final List<Alert> lastAlertList = new ArrayList<>();
-    private final List<Alert> historyAlertList = new ArrayList<>();
+    public static AlertAdapter lastAlertAdapter;
+    public  static AlertAdapter historyAlertAdapter;
+    public static List<Alert> lastAlertList = new ArrayList<>();
+    public static List<Alert> historyAlertList = new ArrayList<>();
 
     private ScheduledExecutorService scheduler;
 
@@ -77,6 +77,36 @@ public class MainActivity extends AppCompatActivity {
         handleNotification();
         handleAudioRecording();
 
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        List<Alert> cachedAlerts = AlertCacheManager.getInstance().getAlerts();
+
+        historyAlertList.clear();
+        historyAlertList.addAll(cachedAlerts);
+        historyAlertAdapter.notifyDataSetChanged();
+
+        if (!cachedAlerts.isEmpty()) {
+            lastAlertList.clear();
+            lastAlertList.add(cachedAlerts.get(0));
+            lastAlertAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private void refreshAlertsFromCache() {
+        List<Alert> updatedAlerts = AlertCacheManager.getInstance().getAlerts();
+
+        historyAlertList.clear();
+        historyAlertList.addAll(updatedAlerts);
+        historyAlertAdapter.notifyDataSetChanged();
+
+        if (!updatedAlerts.isEmpty()) {
+            lastAlertList.clear();
+            lastAlertList.add(updatedAlerts.get(0));
+            lastAlertAdapter.notifyDataSetChanged();
+        }
     }
 
     private void initializeUIComponents() {
