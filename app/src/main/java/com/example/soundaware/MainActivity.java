@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void handleNotification() {
         if (checkNotifPermission()) {
-            notifHelper = new NotificationHelper(this);
+           Log.e("notif","ok");
         } else {
             requestNotifPermission();
         }
@@ -94,7 +94,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void handleAudioRecording() {
         if (checkAudioPermission()) {
-            startScheduledRecording();
+            Intent serviceIntent = new Intent(this, AudioMonitorService.class);
+            ContextCompat.startForegroundService(this, serviceIntent);
+
         } else {
             requestAudioPermission();
         }
