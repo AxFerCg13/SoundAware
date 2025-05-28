@@ -1,5 +1,10 @@
 package com.example.soundaware;
 
+import static com.example.soundaware.MainActivity.historyAlertAdapter;
+import static com.example.soundaware.MainActivity.historyAlertList;
+import static com.example.soundaware.MainActivity.lastAlertAdapter;
+import static com.example.soundaware.MainActivity.lastAlertList;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
@@ -15,6 +20,7 @@ import com.example.soundaware.api.models.audio.AudioResponse;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -108,9 +114,26 @@ public class AudioManager {
 
             Alert alert = new Alert(id, iconType, response.getDate(), response.getClassMessage(), response.getUrgency_level(), response.getDescription());
 
-            //TODO: Almacenar en la BD
+            AlertCacheManager.getInstance().addAlert(alert);
+            refreshAlertsFromCache();
+
         }
     }
+
+    private void refreshAlertsFromCache() {
+        List<Alert> alerts = AlertCacheManager.getInstance().getAlerts();
+
+        historyAlertList.clear();
+        historyAlertList.addAll(alerts);
+        historyAlertAdapter.notifyDataSetChanged();
+
+        if (!alerts.isEmpty()) {
+            lastAlertList.clear();
+            lastAlertList.add(alerts.get(0));
+            lastAlertAdapter.notifyDataSetChanged();
+        }
+    }
+
 
     private File createNewAudioFile() {
         File dir = context.getExternalFilesDir(Environment.DIRECTORY_MUSIC);
